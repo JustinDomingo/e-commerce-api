@@ -16,7 +16,7 @@ const userSchema = mongoose.Schema({
     unique: [true, "That email is already in use"],
     validate: [
       (value) => {
-        return validator.isEmail(value) //function can be passed in as first argument
+        return validator.isEmail(value) //function can be passed in as first argument, if falsy then error will be thrown
       },
       "You must enter a valid email", //second argument will be error msg
     ],
@@ -27,6 +27,7 @@ const userSchema = mongoose.Schema({
   },
   cart: Array,
   isAdmin: Boolean,
+  address: String,
 })
 
 const UserModel = mongoose.model("user", userSchema)
@@ -63,6 +64,7 @@ User.prototype.createUser = function () {
         password: this.data.password,
         cart: [],
         isAdmin: false,
+        address: "",
       })
       user
         .save() //returns promise
@@ -97,6 +99,56 @@ User.getCartItems = function (_id) {
       resolve(user.cart)
     } else {
       reject("404")
+    }
+  })
+}
+
+User.clearCart = function (_id) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let user = await UserModel.findOne({ _id })
+      user.cart = []
+      let res = await user.save()
+      resolve(res)
+    } catch (err) {
+      reject(err)
+    }
+  })
+}
+
+User.setAddress = function ({ address }, _id) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let user = await UserModel.findOne({ _id })
+      user.address = address
+      let res = await user.save()
+      resolve(res)
+    } catch (err) {
+      reject(err)
+    }
+  })
+}
+
+User.deleteAddress = function (_id) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let user = await UserModel.findOne({ _id })
+      user.address = ""
+      let res = await user.save()
+      resolve(res)
+    } catch (err) {
+      reject(err)
+    }
+  })
+}
+
+User.getUser = function (_id) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let user = await UserModel.findOne({ _id })
+      resolve(user)
+    } catch (err) {
+      reject(err)
     }
   })
 }

@@ -42,7 +42,7 @@ Pants.prototype.create = async function () {
       name: "Jeans",
       price: 20,
       category: "pants",
-      iconCode: 4,
+      iconCode: 3,
     })
     try {
       await pants.save()
@@ -60,7 +60,7 @@ Pants.prototype.validate = function () {
     if (user.cart.length) {
       user.cart.forEach((item) => {
         // loops through cart array and looks for a match
-        if (item._id == this.data.itemID) {
+        if (item.name == this.data.itemName) {
           arr.push(item)
         } else {
           return
@@ -95,6 +95,81 @@ Pants.prototype.addToCart = function () {
       console.log(err)
       reject(err)
     }
+  })
+}
+
+Pants.addPants = function ({ user, item }) {
+  const validate = (companyStock, userStock) => {
+    if (userStock > companyStock - 1) {
+      throw new Error("Not enough in stock.")
+    }
+  }
+
+  const getStock = (arr) => {
+    currentUserStock = []
+    arr.forEach((_item) => {
+      if (_item.name == item.name) {
+        currentUserStock.push(item)
+      }
+    })
+    console.log(currentUserStock)
+    return currentUserStock.length
+  }
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      let currentUser = await UserModel.findOne({ _id: user._id })
+      let pants = await PantsModel.find({ name: item.name })
+      let length = getStock(currentUser.cart)
+      let test = pants[length]
+      validate(pants.length, length)
+      currentUser.cart.push(test)
+      let doc = await currentUser.save()
+      resolve(doc.cart)
+    } catch (err) {
+      console.log(err)
+      reject(err)
+    }
+  })
+}
+
+Pants.subtractPants = function ({ user, item }) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let currentUser = await UserModel.findOne({ _id: user._id })
+      let array = currentUser.cart
+      array.every((_item, index, object) => {
+        if (_item.name === item.name) {
+          object.splice(index, 1)
+          return false
+        } else {
+          return true
+        }
+      })
+      currentUser.cart = array
+      let doc = await currentUser.save()
+      resolve(doc.cart)
+    } catch (err) {
+      console.log(err)
+      reject(err)
+    }
+  })
+}
+
+Pants.delete = function (idArray) {
+  return new Promise(async (resolve, reject) => {
+    let pants = await PantsModel.find()
+    idArray.forEach((id) => {
+      let num = pants.findIndex((item, index) => {
+        if (item._id.toString() === id) {
+          return true
+        }
+      })
+      pants.splice(num, 1)
+    })
+    await PantsModel.deleteMany()
+    let _pants = await PantsModel.insertMany(pants)
+    resolve(_pants)
   })
 }
 

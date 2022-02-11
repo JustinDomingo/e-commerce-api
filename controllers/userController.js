@@ -55,7 +55,6 @@ exports.login = async (req, res) => {
 }
 
 exports.logout = (req, res) => {
-  console.log(req.cookies)
   res.clearCookie("jwt")
   res.send("Cookie cleared")
 }
@@ -68,4 +67,58 @@ exports.getCartItems = async (req, res) => {
   } catch {
     res.status(500).json("Error")
   }
+}
+
+exports.jwtValidate = (req, res, next) => {
+  let token = req.cookies.jwt
+  jwt.verify(token, process.env.SECRET, (err, decodedToken) => {
+    if (!err) {
+      req.validUser = decodedToken
+      next()
+    } else {
+      console.log("Failed")
+      res.status(500).send("Invalid token")
+    }
+  })
+}
+
+exports.clearCartItems = (req, res) => {
+  User.clearCart(req.params.id)
+    .then((user) => {
+      res.status(201).json(user)
+    })
+    .catch((err) => {
+      res.status(500).json(err)
+    })
+}
+
+exports.updateAddress = (req, res) => {
+  User.setAddress(req.body, req.params.userid)
+    .then((user) => {
+      res.status(201).json(user)
+    })
+    .catch((err) => {
+      res.status(500).json(err)
+    })
+}
+
+exports.deleteAddress = (req, res) => {
+  User.deleteAddress(req.params.userid)
+    .then((user) => {
+      res.status(201).json(user)
+    })
+    .catch((err) => {
+      res.status(500).json(err)
+    })
+}
+
+exports.getUser = (req, res) => {
+  User.getUser(req.params.id)
+    .then((user) => {
+      res.status(201).json(user)
+    })
+    .catch((err) => {
+      console.log(err)
+      res.status(500).json(err)
+    })
 }

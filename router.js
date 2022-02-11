@@ -4,18 +4,22 @@ const itemController = require("./controllers/itemController")
 const userController = require("./controllers/userController")
 
 router.get("/", (req, res) => {
-  res.json("Welcome to the API")
+  res.json("Welcome to the API of 'Fabrix'")
 })
 
 //fetching data routes
+router.get("/user/:id", userController.getUser)
 router.get("/items", itemController.getItems)
 router.get("/cart/:id", userController.getCartItems)
 router.get("/shirts", itemController.getShirts)
 router.get("/shirts/:id", itemController.getShirt)
 router.get("/pants", itemController.getPants)
 router.get("/pants/:id", itemController.getSinglePants)
+router.get("/tops", itemController.getTops) // gets just one of each item
+router.get("/bottoms", itemController.getBottoms)
+router.get("/get-quantity/:category/:userid", itemController.getQuantity)
 
-//creating new shirts (less tedious)
+//creating new items (less tedious)
 router.post("/create-shirt", itemController.createShirt)
 router.post("/create-pants", itemController.createPants)
 
@@ -23,8 +27,13 @@ router.post("/create-pants", itemController.createPants)
 router.post("/register", userController.register)
 router.post("/login", userController.login)
 router.delete("/logout", userController.logout)
+router.route("/update-address/:userid").put(userController.updateAddress).delete(userController.deleteAddress)
 
 //shopping cart routes
 router.post("/add-item", itemController.addItem)
+router.post("/add-quantity", itemController.addQuantity)
+router.post("/subtract-quantity", itemController.subtractQuantity)
+router.delete("/cart/:id", userController.clearCartItems)
+router.delete("/remove-stock/:id", itemController.removeItems)
 
 module.exports = router

@@ -1,5 +1,6 @@
 const Shirt = require("../models/Shirt")
 const Pants = require("../models/Pants")
+const { UserModel } = require("../models/User")
 
 exports.getItems = async (req, res) => {
   try {
@@ -57,7 +58,6 @@ exports.createShirt = (req, res) => {
   shirt
     .create()
     .then((item) => {
-      console.log(item)
       res.status(201).json("Success")
     })
     .catch((err) => {
@@ -71,7 +71,6 @@ exports.createPants = (req, res) => {
   pants
     .create()
     .then((item) => {
-      console.log(item)
       res.status(201).json("Success")
     })
     .catch((err) => {
@@ -81,8 +80,7 @@ exports.createPants = (req, res) => {
 }
 
 exports.addItem = (req, res) => {
-  const data = { itemID: req.body.data._id, userID: req.body.user._id }
-  console.log(data)
+  const data = { itemName: req.body.data.name, userID: req.body.user._id, itemID: req.body.data._id }
   if (req.body.data.category == "shirts") {
     let shirt = new Shirt(data)
     shirt
@@ -104,5 +102,118 @@ exports.addItem = (req, res) => {
       .catch((err) => {
         res.status(500).json(err)
       })
+  }
+}
+
+exports.addQuantity = async (req, res) => {
+  console.log(req.body)
+  if (req.body.item.category == "shirts") {
+    try {
+      let cart = await Shirt.addShirt(req.body)
+      res.status(201).json(cart)
+    } catch (err) {
+      res.status(500).json(err)
+    }
+  }
+
+  if (req.body.item.category == "pants") {
+    try {
+      let result = await Pants.addPants(req.body)
+      res.status(201).json(result)
+    } catch (err) {
+      console.log(err)
+      res.status(500).json(err)
+    }
+  }
+}
+
+exports.subtractQuantity = async (req, res) => {
+  console.log(req.body)
+  if (req.body.item.category == "shirts") {
+    try {
+      let cart = await Shirt.subtractShirt(req.body)
+      res.status(201).json(cart)
+    } catch (err) {
+      res.status(500).json(err)
+    }
+  }
+  if (req.body.item.category == "pants") {
+    try {
+      let cart = await Pants.subtractPants(req.body)
+      res.status(201).json(cart)
+    } catch (err) {
+      res.status(500).json(err)
+    }
+  }
+}
+
+exports.getTops = async (req, res) => {
+  try {
+    let shirts = await Shirt.getShirts()
+    let results = Shirt.processShirts(shirts)
+    res.status(201).json(results)
+  } catch (err) {
+    console.log(err)
+    res.status(404).json(err)
+  }
+}
+
+exports.getBottoms = async (req, res) => {
+  try {
+    let pants = await Pants.getPants()
+    let results = Shirt.processShirts(pants)
+    res.status(201).json(results)
+  } catch (err) {
+    console.log(err)
+    res.status(404).json(err)
+  }
+}
+
+exports.getQuantity = async (req, res) => {
+  if (req.params.category == "shirts") {
+    try {
+      let cart = await Shirt.getQuantity(req.params.category, req.params.userid)
+      res.status(201).json(cart)
+    } catch (err) {
+      res.status(500).json(err)
+    }
+  }
+  // if (req.params.category == "pants") {
+  //   try {
+  //     let cart = await Pants.addShirt(req.body)
+  //     res.status(201).json(cart)
+  //   } catch (err) {
+  //     res.status(500).json(err)
+  //   }
+  // }
+}
+
+exports.removeItems = async (req, res) => {
+  let user = await UserModel.findOne({ _id: req.params.id })
+  let shirts = user.cart.filter((item) => {
+    return item.category === "shirts"
+  })
+  let pants = user.cart.filter((item) => {
+    return item.category === "pants"
+  })
+
+  if (shirts.length) {
+    let idArray = []
+    shirts.forEach((item) => {
+      idArray.push(item._id)
+    })
+    Shirt.delete(idArray).then(() => {
+      res.send("success")
+    })
+  }
+
+  if (pants.length) {
+    let idArray = []
+    pants.forEach((item) => {
+      idArray.push(item._id)
+    })
+    Pants.delete(idArray).then(() => {
+      res.send("success")
+    })
   }
 }
