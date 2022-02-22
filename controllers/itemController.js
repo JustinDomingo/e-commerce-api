@@ -217,3 +217,16 @@ exports.removeItems = async (req, res) => {
     })
   }
 }
+
+exports.getShirtsBySize = async (req, res) => {
+  console.log(req.params.color)
+  try {
+    let shirts = await Shirt.getSpecificShirts(req.params.color)
+    let sortedShirts = shirts.filter((item) => {
+      return item.size == req.params.size
+    })
+    res.status(200).json(sortedShirts.length)
+  } catch (err) {
+    res.status(500).json(err)
+  }
+}

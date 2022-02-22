@@ -13,6 +13,7 @@ router.get("/items", itemController.getItems)
 router.get("/cart/:id", userController.getCartItems)
 router.get("/shirts", itemController.getShirts)
 router.get("/shirts/:id", itemController.getShirt)
+router.get("/shirts/sizes/:color/:size", itemController.getShirtsBySize)
 router.get("/pants", itemController.getPants)
 router.get("/pants/:id", itemController.getSinglePants)
 router.get("/tops", itemController.getTops) // gets just one of each item

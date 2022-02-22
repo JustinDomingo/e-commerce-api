@@ -6,6 +6,7 @@ const shirtSchema = new mongoose.Schema({
   price: Number,
   category: String,
   iconCode: Number,
+  size: String,
 })
 
 const ShirtModel = mongoose.model("shirt", shirtSchema)
@@ -23,6 +24,17 @@ Shirt.getShirts = function () {
   return new Promise(async (resolve, reject) => {
     try {
       let shirt = await ShirtModel.find()
+      resolve(shirt)
+    } catch (err) {
+      reject(err)
+    }
+  })
+}
+
+Shirt.getSpecificShirts = function (color) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let shirt = await ShirtModel.find({ name: color })
       resolve(shirt)
     } catch (err) {
       reject(err)
@@ -73,26 +85,27 @@ Shirt.getItem = function (id) {
 }
 
 Shirt.prototype.randomizer = function () {
-  randomNum = Math.floor(Math.random() * 2)
+  randomNum = Math.floor(Math.random() * 3)
   if (randomNum == 0) {
-    return { name: "White T-Shirt", iconCode: 1 }
+    return { name: "White T-Shirt", iconCode: 1, size: "small" }
   }
   if (randomNum == 1) {
-    return { name: "Red T-Shirt", iconCode: 2 }
+    return { name: "Red T-Shirt", iconCode: 2, size: "medium" }
   }
   if (randomNum == 2) {
-    return { name: "Blue T-Shirt", iconCode: 3 }
+    return { name: "Blue T-Shirt", iconCode: 3, size: "large" }
   }
 }
 
 Shirt.prototype.create = async function () {
   return new Promise(async (resolve, reject) => {
-    let { name, iconCode } = this.randomizer()
+    let { name, iconCode, size } = this.randomizer()
     let shirt = new ShirtModel({
       name,
       price: 10,
       category: "shirts",
       iconCode,
+      size,
     })
     try {
       await shirt.save()
@@ -208,18 +221,24 @@ Shirt.prototype.updateQuant = function () {
   })
 }
 
-Shirt.addShirt = function ({ user, item }) {
+Shirt.addShirt = function ({ user, item, size }) {
   const validate = (companyStock, userStock) => {
-    if (userStock > companyStock - 1) {
+    let sizeStock = companyStock.filter((item) => {
+      return item.size === size
+    })
+    if (userStock > sizeStock - 1) {
       throw new Error("Not enough in stock.")
     }
   }
 
   const checkDuplicate = (cart, whiteShirts) => {
-    let specificCart = cart.filter((item) => {
+    let cartOne = cart.filter((item) => {
       return item.name === "White T-Shirt"
     })
-    let shirt = whiteShirts[specificCart.length] //filter cart by name otherwise it will take into account of length of cart including other items
+    let specificCart = cartOne.filter((item) => {
+      return item.size === size
+    })
+    let shirt = whiteShirts[specificCart.length] //filter cart by name otherwise it will take into account the length of cart including other items
     cart.push(shirt)
   }
 
@@ -299,7 +318,5 @@ Shirt.delete = function (idArray) {
     resolve(_shirts)
   })
 }
-
-// NOTE: Fix "addShirt" method to not add a random item but instead pick an item that hasn't been added yet
 
 module.exports = Shirt

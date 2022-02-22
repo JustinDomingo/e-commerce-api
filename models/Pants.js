@@ -6,6 +6,7 @@ const pantsSchema = new mongoose.Schema({
   price: Number,
   category: String,
   iconCode: Number,
+  size: String,
 })
 
 const PantsModel = mongoose.model("pant", pantsSchema)
@@ -36,13 +37,28 @@ Pants.getItem = function (id) {
   })
 }
 
+Pants.prototype.randomize = function () {
+  randomNum = Math.floor(Math.random() * 3)
+  if (randomNum == 0) {
+    return "small"
+  }
+  if (randomNum == 1) {
+    return "medium"
+  }
+  if (randomNum == 2) {
+    return "large"
+  }
+}
+
 Pants.prototype.create = async function () {
   return new Promise(async (resolve, reject) => {
+    let size = this.randomize()
     let pants = new PantsModel({
       name: "Jeans",
       price: 20,
       category: "pants",
       iconCode: 3,
+      size,
     })
     try {
       await pants.save()
