@@ -216,6 +216,7 @@ Shirt.prototype.updateQuant = function () {
       }
       //await user.save()
     } else {
+      dw
       reject(this.errors)
     }
   })
