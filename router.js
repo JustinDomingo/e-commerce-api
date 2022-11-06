@@ -21,8 +21,8 @@ router.get("/bottoms", itemController.getBottoms)
 router.get("/get-quantity/:category/:userid", itemController.getQuantity)
 
 //creating new items (less tedious)
-router.post("/create-shirt", itemController.createShirt)
-router.post("/create-pants", itemController.createPants)
+router.post("/shirts", itemController.createShirt)
+router.post("/pants", itemController.createPants)
 
 //user routes
 router.post("/register", userController.register)
@@ -31,10 +31,10 @@ router.delete("/logout", userController.logout)
 router.route("/update-address/:userid").put(userController.updateAddress).delete(userController.deleteAddress)
 
 //shopping cart routes
-router.post("/add-item", itemController.addItem)
-router.post("/add-quantity", itemController.addQuantity)
-router.post("/subtract-quantity", itemController.subtractQuantity)
+router.post("/items", itemController.addItem)
+router.post("/quantity", itemController.addQuantity)
+router.delete("/quantity", itemController.subtractQuantity)
 router.delete("/cart/:id", userController.clearCartItems)
-router.delete("/remove-stock/:id", itemController.removeItems)
+router.delete("/items/:id", itemController.removeItems)
 
 module.exports = router
